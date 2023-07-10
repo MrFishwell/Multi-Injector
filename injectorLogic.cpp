@@ -50,7 +50,10 @@ DWORD getProcIdViaString()
 
 	// handle failed return 0.
 	if (procList == INVALID_HANDLE_VALUE)
+	{
+		delete[] inputProcName;
 		return BAD_PROC_ID_VIA_SNAP;
+	}
 
 	// handle success.
 	if (Process32First(procList, &thisProc)) // return false if fails.
@@ -98,23 +101,15 @@ bool verifyProcId(DWORD procId)
 	if (procId == BAD_PROC_ID_VIA_SNAP || procId == PROC_FIRST_OR_NEXT_HAS_FAILED)
 	{
 		// print error.
-		std::cout << '[';
-		setColor(ERROR_COLOR_RED);
-		std::cout << "ER";
-		setColor(DEFAULT_COLOR_WHITE);
-		std::cout << "]~> SnapTool has Failed!\n";
+		erPrint("SnapTool has Failed!");
 		return false;
 	}
 
 	// handling name was not found.
 	if (procId == GIVEN_NAME_WAS_NOT_FOUND_IN_PROC_LIST)
 	{
-		// print procInfo.
-		std::cout << '[';
-		setColor(ERROR_COLOR_RED);
-		std::cout << "ER";
-		setColor(DEFAULT_COLOR_WHITE);
-		std::cout << "]~> Process name was unable to find a match!\n";
+		// print error.
+		erPrint("Process name was unable to find a match!");
 		return false;
 	}
 
