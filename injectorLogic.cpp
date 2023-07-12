@@ -56,32 +56,7 @@ DWORD getProcIdViaString()
 	}
 
 	// handle success.
-	if (Process32First(procList, &thisProc)) // return false if fails.
-	{
-		do
-		{
-			if (!_stricmp(inputProcName, thisProc.szExeFile))
-			{
-				curProcId = thisProc.th32ProcessID; // found the procId by string compare [non-case sense].
-				// print procInfo.
-				std::cout << '[';
-				setColor(OK_COLOR_GREEN);
-				std::cout << "OK";
-				setColor(DEFAULT_COLOR_WHITE);
-				std::cout << "]~> Found: [";
-				setColor(INFO_COLOR_YELLOW);
-				std::cout << thisProc.szExeFile;
-				setColor(DEFAULT_COLOR_WHITE);
-				std::cout << "], PID: [";
-				setColor(INFO_COLOR_YELLOW);
-				std::cout << thisProc.th32ProcessID;
-				setColor(DEFAULT_COLOR_WHITE);
-				std::cout << "]\n";
-				break;
-			}
-		} while (Process32Next(procList, &thisProc));
-	}
-	else
+	if (!Process32First(procList, &thisProc)) // return false if fails.
 	{
 		// clear heap.
 		CloseHandle(procList);
@@ -89,6 +64,29 @@ DWORD getProcIdViaString()
 		return PROC_FIRST_OR_NEXT_HAS_FAILED;
 	}
 	
+	do
+	{
+		if (!_stricmp(inputProcName, thisProc.szExeFile))
+		{
+			curProcId = thisProc.th32ProcessID; // found the procId by string compare [non-case sense].
+			// print procInfo.
+			std::cout << '[';
+			setColor(OK_COLOR_GREEN);
+			std::cout << "OK";
+			setColor(DEFAULT_COLOR_WHITE);
+			std::cout << "]~> Found: [";
+			setColor(INFO_COLOR_YELLOW);
+			std::cout << thisProc.szExeFile;
+			setColor(DEFAULT_COLOR_WHITE);
+			std::cout << "], PID: [";
+			setColor(INFO_COLOR_YELLOW);
+			std::cout << thisProc.th32ProcessID;
+			setColor(DEFAULT_COLOR_WHITE);
+			std::cout << "]\n";
+			break;
+		}
+	} while (Process32Next(procList, &thisProc));
+
 	// clear heap.
 	CloseHandle(procList);
 	delete[] inputProcName;
@@ -124,7 +122,7 @@ void setColor(int color)
 	SetConsoleTextAttribute(consoleHandle, color);
 }
 
-LPWSTR getDllPathViaDialogBox()
+TCHAR* getDllPathViaDialogBox()
 {
 	// define the file struct.
 	OPENFILENAME fileStruct;
@@ -151,7 +149,7 @@ LPWSTR getDllPathViaDialogBox()
 		std::cout << retDllPath;
 		setColor(DEFAULT_COLOR_WHITE);
 		std::cout << "]\n";
-		return (LPWSTR)retDllPath;
+		return retDllPath;
 	}
 	else
 	{
@@ -159,7 +157,7 @@ LPWSTR getDllPathViaDialogBox()
 		erPrint("Failed to get the file path!");
 		TCHAR* failDllPath = new TCHAR[sizeof(dllPath) + 1];
 		_tcscpy_s(failDllPath, sizeof(dllPath) + 1, dllPath);
-		return (LPWSTR)failDllPath;
+		return failDllPath;
 	}
 }
 
@@ -191,4 +189,14 @@ void infPrint(const char* dialog)
 	std::cout << "!!";
 	setColor(DEFAULT_COLOR_WHITE);
 	std::cout << "]~> " << dialog;
+}
+
+int getInjectionMethod()
+{
+	int choice = 0;
+	okPrint("Select an injection method!");
+	infPrint("1) Manual Map.\n");
+	infPrint("use Injection?: ");
+	std::cin >> choice;
+	return choice;
 }
